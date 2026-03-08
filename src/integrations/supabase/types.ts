@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      football_games: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          league: string
+          team_a: string
+          team_b: string
+          time: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          league: string
+          team_a: string
+          team_b: string
+          time: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          league?: string
+          team_a?: string
+          team_b?: string
+          time?: string
+        }
+        Relationships: []
+      }
+      movies: {
+        Row: {
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          image: string
+          time: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          image: string
+          time: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          image?: string
+          time?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
