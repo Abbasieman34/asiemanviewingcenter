@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
-  getMovies, saveMovies, getGames, saveGames, generateId,
+  getMovies, addMovie, updateMovie, deleteMovie,
+  getGames, addGame, updateGame, deleteGame,
   type Movie, type FootballGame,
 } from "@/lib/store";
 
-const ADMIN_PIN = "1234";
+const ADMIN_PIN = "0034";
 
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -46,7 +47,6 @@ const Admin = () => {
             <Button onClick={handleLogin} className="w-full gold-gradient text-primary-foreground font-semibold">
               Login
             </Button>
-            <p className="text-xs text-muted-foreground text-center">Default PIN: 1234</p>
           </div>
         </div>
       </div>
@@ -66,14 +66,19 @@ const Admin = () => {
 
 /* ── Movie Manager ── */
 function MovieManager() {
-  const [movies, setMovies] = useState<Movie[]>(getMovies());
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [editing, setEditing] = useState<Movie | null>(null);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
+  const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    getMovies().then(setMovies).catch(() => toast.error("Failed to load movies"));
+  }, []);
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,36 +93,41 @@ function MovieManager() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title || !date || !time || (!image && !editing)) {
       toast.error("Please fill title, date, time and image");
       return;
     }
-    let updated: Movie[];
-    if (editing) {
-      updated = movies.map((m) =>
-        m.id === editing.id ? { ...m, title, date, time, description, image: image || m.image } : m
-      );
-      toast.success("Movie updated!");
-    } else {
-      const newMovie: Movie = { id: generateId(), title, date, time, description, image };
-      updated = [...movies, newMovie];
-      toast.success("Movie added!");
+    setLoading(true);
+    try {
+      if (editing) {
+        await updateMovie(editing.id, { title, date, time, description, image: image || editing.image });
+        toast.success("Movie updated!");
+      } else {
+        await addMovie({ title, date, time, description, image });
+        toast.success("Movie added!");
+      }
+      setMovies(await getMovies());
+      resetForm();
+    } catch {
+      toast.error("Failed to save movie");
+    } finally {
+      setLoading(false);
     }
-    saveMovies(updated);
-    setMovies(updated);
-    resetForm();
   };
 
   const handleEdit = (m: Movie) => {
     setEditing(m); setTitle(m.title); setDate(m.date); setTime(m.time); setDescription(m.description || ""); setImage(m.image);
   };
 
-  const handleDelete = (id: string) => {
-    const updated = movies.filter((m) => m.id !== id);
-    saveMovies(updated);
-    setMovies(updated);
-    toast.success("Movie deleted");
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMovie(id);
+      setMovies(await getMovies());
+      toast.success("Movie deleted");
+    } catch {
+      toast.error("Failed to delete movie");
+    }
   };
 
   return (
@@ -137,12 +147,10 @@ function MovieManager() {
         <Textarea placeholder="Short description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
         {image && <img src={image} alt="Preview" className="h-32 rounded-lg object-cover" />}
         <div className="flex gap-3">
-          <Button onClick={handleSave} className="gold-gradient text-primary-foreground font-semibold">
+          <Button onClick={handleSave} disabled={loading} className="gold-gradient text-primary-foreground font-semibold">
             <Plus className="h-4 w-4 mr-1" /> {editing ? "Update" : "Add"} Movie
           </Button>
-          {editing && (
-            <Button variant="outline" onClick={resetForm}>Cancel</Button>
-          )}
+          {editing && <Button variant="outline" onClick={resetForm}>Cancel</Button>}
         </div>
       </div>
 
@@ -158,12 +166,8 @@ function MovieManager() {
                 <p className="text-xs text-muted-foreground">{m.date} at {m.time}</p>
               </div>
               <div className="flex gap-2 flex-shrink-0">
-                <Button size="icon" variant="ghost" onClick={() => handleEdit(m)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(m.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <Button size="icon" variant="ghost" onClick={() => handleEdit(m)}><Pencil className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(m.id)}><Trash2 className="h-4 w-4" /></Button>
               </div>
             </div>
           ))}
@@ -175,48 +179,58 @@ function MovieManager() {
 
 /* ── Game Manager ── */
 function GameManager() {
-  const [games, setGames] = useState<FootballGame[]>(getGames());
+  const [games, setGames] = useState<FootballGame[]>([]);
   const [editing, setEditing] = useState<FootballGame | null>(null);
   const [teamA, setTeamA] = useState("");
   const [teamB, setTeamB] = useState("");
   const [league, setLeague] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getGames().then(setGames).catch(() => toast.error("Failed to load games"));
+  }, []);
 
   const resetForm = () => {
     setTeamA(""); setTeamB(""); setLeague(""); setDate(""); setTime(""); setEditing(null);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!teamA || !teamB || !league || !date || !time) {
       toast.error("Please fill all fields");
       return;
     }
-    let updated: FootballGame[];
-    if (editing) {
-      updated = games.map((g) =>
-        g.id === editing.id ? { ...g, teamA, teamB, league, date, time } : g
-      );
-      toast.success("Game updated!");
-    } else {
-      const newGame: FootballGame = { id: generateId(), teamA, teamB, league, date, time };
-      updated = [...games, newGame];
-      toast.success("Game added!");
+    setLoading(true);
+    try {
+      if (editing) {
+        await updateGame(editing.id, { teamA, teamB, league, date, time });
+        toast.success("Game updated!");
+      } else {
+        await addGame({ teamA, teamB, league, date, time });
+        toast.success("Game added!");
+      }
+      setGames(await getGames());
+      resetForm();
+    } catch {
+      toast.error("Failed to save game");
+    } finally {
+      setLoading(false);
     }
-    saveGames(updated);
-    setGames(updated);
-    resetForm();
   };
 
   const handleEdit = (g: FootballGame) => {
     setEditing(g); setTeamA(g.teamA); setTeamB(g.teamB); setLeague(g.league); setDate(g.date); setTime(g.time);
   };
 
-  const handleDelete = (id: string) => {
-    const updated = games.filter((g) => g.id !== id);
-    saveGames(updated);
-    setGames(updated);
-    toast.success("Game deleted");
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteGame(id);
+      setGames(await getGames());
+      toast.success("Game deleted");
+    } catch {
+      toast.error("Failed to delete game");
+    }
   };
 
   return (
@@ -231,17 +245,15 @@ function GameManager() {
           <Input placeholder="Team A" value={teamA} onChange={(e) => setTeamA(e.target.value)} />
           <Input placeholder="Team B" value={teamB} onChange={(e) => setTeamB(e.target.value)} />
           <Input placeholder="League (e.g. Premier League)" value={league} onChange={(e) => setLeague(e.target.value)} />
-          <div /> {/* spacer */}
+          <div />
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
         <div className="flex gap-3">
-          <Button onClick={handleSave} className="gold-gradient text-primary-foreground font-semibold">
+          <Button onClick={handleSave} disabled={loading} className="gold-gradient text-primary-foreground font-semibold">
             <Plus className="h-4 w-4 mr-1" /> {editing ? "Update" : "Add"} Game
           </Button>
-          {editing && (
-            <Button variant="outline" onClick={resetForm}>Cancel</Button>
-          )}
+          {editing && <Button variant="outline" onClick={resetForm}>Cancel</Button>}
         </div>
       </div>
 
@@ -256,12 +268,8 @@ function GameManager() {
                 <p className="text-xs text-muted-foreground">{g.league} — {g.date} at {g.time}</p>
               </div>
               <div className="flex gap-2 flex-shrink-0">
-                <Button size="icon" variant="ghost" onClick={() => handleEdit(g)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(g.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <Button size="icon" variant="ghost" onClick={() => handleEdit(g)}><Pencil className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(g.id)}><Trash2 className="h-4 w-4" /></Button>
               </div>
             </div>
           ))}
