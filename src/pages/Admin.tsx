@@ -1,52 +1,58 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, Lock } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import {
   getMovies, addMovie, updateMovie, deleteMovie,
   getGames, addGame, updateGame, deleteGame,
   type Movie, type FootballGame,
 } from "@/lib/store";
 
-const ADMIN_PIN = "0034";
-
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [pin, setPin] = useState("");
+  const { user, isAdmin, loading, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (pin === ADMIN_PIN) {
-      setAuthenticated(true);
-      toast.success("Welcome, Admin!");
-    } else {
-      toast.error("Incorrect PIN");
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
     }
-  };
+  }, [loading, user, navigate]);
 
-  if (!authenticated) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-primary text-lg animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="flex items-center justify-center py-32">
-          <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-4">
-            <div className="flex items-center gap-2 justify-center text-primary">
-              <Lock className="h-6 w-6" />
-              <h2 className="text-2xl">ADMIN LOGIN</h2>
+          <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-4 text-center">
+            <ShieldAlert className="h-12 w-12 text-destructive mx-auto" />
+            <h2 className="text-2xl text-primary">ACCESS DENIED</h2>
+            <p className="text-sm text-muted-foreground">
+              You are signed in as <span className="text-foreground">{user.email}</span> but you don't have admin privileges.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Contact the site owner to request admin access.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate("/")} className="flex-1">Home</Button>
+              <Button variant="outline" onClick={signOut} className="flex-1">
+                <LogOut className="h-4 w-4 mr-1" /> Sign Out
+              </Button>
             </div>
-            <Input
-              type="password"
-              placeholder="Enter admin PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="text-center text-lg tracking-widest"
-            />
-            <Button onClick={handleLogin} className="w-full gold-gradient text-primary-foreground font-semibold">
-              Login
-            </Button>
           </div>
         </div>
       </div>
@@ -57,6 +63,12 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 py-8 space-y-12">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Signed in as <span className="text-foreground">{user.email}</span></p>
+          <Button variant="outline" size="sm" onClick={signOut}>
+            <LogOut className="h-4 w-4 mr-1" /> Sign Out
+          </Button>
+        </div>
         <MovieManager />
         <GameManager />
       </div>
