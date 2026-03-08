@@ -159,15 +159,26 @@ const Login = () => {
             Sign in with Google
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline"
-            >
-              {isSignUp ? "Sign In" : "Sign Up"}
-            </button>
-          </p>
+          {isForgotPassword ? (
+            <p className="text-xs text-center text-muted-foreground">
+              <button
+                onClick={() => setIsForgotPassword(false)}
+                className="text-primary hover:underline"
+              >
+                Back to Sign In
+              </button>
+            </p>
+          ) : (
+            <p className="text-xs text-center text-muted-foreground">
+              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-primary hover:underline"
+              >
+                {isSignUp ? "Sign In" : "Sign Up"}
+              </button>
+            </p>
+          )}
           <p className="text-xs text-center text-muted-foreground">
             After signing up, ask the site owner to grant you admin access.
           </p>
