@@ -116,11 +116,11 @@ const Login = () => {
               </button>
             </div>
             <Button
-              onClick={handleEmailAuth}
+              onClick={isForgotPassword ? handleForgotPassword : handleEmailAuth}
               disabled={loading}
               className="w-full gold-gradient text-primary-foreground font-semibold"
             >
-              {loading ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
+              {loading ? "Please wait..." : isForgotPassword ? "Send Reset Link" : isSignUp ? "Sign Up" : "Sign In"}
             </Button>
           </div>
 
