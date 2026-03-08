@@ -83,7 +83,7 @@ const Login = () => {
         <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-6">
           <div className="flex items-center gap-2 justify-center text-primary">
             <Lock className="h-6 w-6" />
-            <h2 className="text-2xl">ADMIN LOGIN</h2>
+            <h2 className="text-2xl">{isForgotPassword ? "RESET PASSWORD" : "ADMIN LOGIN"}</h2>
           </div>
 
           <div className="space-y-3">
