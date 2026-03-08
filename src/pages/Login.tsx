@@ -15,6 +15,27 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Check your email for a password reset link!");
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reset email");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEmailAuth = async () => {
     if (!email || !password) {
@@ -62,7 +83,7 @@ const Login = () => {
         <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-6">
           <div className="flex items-center gap-2 justify-center text-primary">
             <Lock className="h-6 w-6" />
-            <h2 className="text-2xl">ADMIN LOGIN</h2>
+            <h2 className="text-2xl">{isForgotPassword ? "RESET PASSWORD" : "ADMIN LOGIN"}</h2>
           </div>
 
           <div className="space-y-3">
@@ -76,30 +97,41 @@ const Login = () => {
                 className="pl-10"
               />
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
-                className="pl-10 pr-10"
-              />
+            {!isForgotPassword && (
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
+                  className="pl-10 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            )}
+            {!isForgotPassword && !isSignUp && (
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsForgotPassword(true)}
+                className="text-xs text-primary hover:underline w-full text-right"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                Forgot password?
               </button>
-            </div>
+            )}
             <Button
-              onClick={handleEmailAuth}
+              onClick={isForgotPassword ? handleForgotPassword : handleEmailAuth}
               disabled={loading}
               className="w-full gold-gradient text-primary-foreground font-semibold"
             >
-              {loading ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
+              {loading ? "Please wait..." : isForgotPassword ? "Send Reset Link" : isSignUp ? "Sign Up" : "Sign In"}
             </Button>
           </div>
 
@@ -127,15 +159,26 @@ const Login = () => {
             Sign in with Google
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline"
-            >
-              {isSignUp ? "Sign In" : "Sign Up"}
-            </button>
-          </p>
+          {isForgotPassword ? (
+            <p className="text-xs text-center text-muted-foreground">
+              <button
+                onClick={() => setIsForgotPassword(false)}
+                className="text-primary hover:underline"
+              >
+                Back to Sign In
+              </button>
+            </p>
+          ) : (
+            <p className="text-xs text-center text-muted-foreground">
+              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-primary hover:underline"
+              >
+                {isSignUp ? "Sign In" : "Sign Up"}
+              </button>
+            </p>
+          )}
           <p className="text-xs text-center text-muted-foreground">
             After signing up, ask the site owner to grant you admin access.
           </p>
