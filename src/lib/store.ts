@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface Movie {
   id: string;
   title: string;
@@ -14,30 +16,103 @@ export interface FootballGame {
   league: string;
   date: string;
   time: string;
-  image?: string;
 }
 
-const MOVIES_KEY = "asieman_movies";
-const GAMES_KEY = "asieman_games";
-
-export function getMovies(): Movie[] {
-  const data = localStorage.getItem(MOVIES_KEY);
-  return data ? JSON.parse(data) : [];
+export async function getMovies(): Promise<Movie[]> {
+  const { data, error } = await supabase
+    .from("movies")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data || []).map((m) => ({
+    id: m.id,
+    title: m.title,
+    image: m.image,
+    date: m.date,
+    time: m.time,
+    description: m.description ?? undefined,
+  }));
 }
 
-export function saveMovies(movies: Movie[]) {
-  localStorage.setItem(MOVIES_KEY, JSON.stringify(movies));
+export async function addMovie(movie: Omit<Movie, "id">): Promise<Movie> {
+  const { data, error } = await supabase
+    .from("movies")
+    .insert({
+      title: movie.title,
+      image: movie.image,
+      date: movie.date,
+      time: movie.time,
+      description: movie.description || null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return { ...data, description: data.description ?? undefined };
 }
 
-export function getGames(): FootballGame[] {
-  const data = localStorage.getItem(GAMES_KEY);
-  return data ? JSON.parse(data) : [];
+export async function updateMovie(id: string, movie: Partial<Movie>): Promise<void> {
+  const { error } = await supabase
+    .from("movies")
+    .update({
+      title: movie.title,
+      image: movie.image,
+      date: movie.date,
+      time: movie.time,
+      description: movie.description || null,
+    })
+    .eq("id", id);
+  if (error) throw error;
 }
 
-export function saveGames(games: FootballGame[]) {
-  localStorage.setItem(GAMES_KEY, JSON.stringify(games));
+export async function deleteMovie(id: string): Promise<void> {
+  const { error } = await supabase.from("movies").delete().eq("id", id);
+  if (error) throw error;
 }
 
-export function generateId() {
-  return crypto.randomUUID();
+export async function getGames(): Promise<FootballGame[]> {
+  const { data, error } = await supabase
+    .from("football_games")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data || []).map((g) => ({
+    id: g.id,
+    teamA: g.team_a,
+    teamB: g.team_b,
+    league: g.league,
+    date: g.date,
+    time: g.time,
+  }));
+}
+
+export async function addGame(game: Omit<FootballGame, "id">): Promise<FootballGame> {
+  const { data, error } = await supabase
+    .from("football_games")
+    .insert({
+      team_a: game.teamA,
+      team_b: game.teamB,
+      league: game.league,
+      date: game.date,
+      time: game.time,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return { id: data.id, teamA: data.team_a, teamB: data.team_b, league: data.league, date: data.date, time: data.time };
+}
+
+export async function updateGame(id: string, game: Partial<FootballGame>): Promise<void> {
+  const update: Record<string, unknown> = {};
+  if (game.teamA !== undefined) update.team_a = game.teamA;
+  if (game.teamB !== undefined) update.team_b = game.teamB;
+  if (game.league !== undefined) update.league = game.league;
+  if (game.date !== undefined) update.date = game.date;
+  if (game.time !== undefined) update.time = game.time;
+  const { error } = await supabase.from("football_games").update(update).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteGame(id: string): Promise<void> {
+  const { error } = await supabase.from("football_games").delete().eq("id", id);
+  if (error) throw error;
 }
