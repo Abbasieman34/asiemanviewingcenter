@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
