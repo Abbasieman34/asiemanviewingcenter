@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  getMovies, addMovie, updateMovie, deleteMovie,
-  getGames, addGame, updateGame, deleteGame,
+  getMovies, addMovie, updateMovie, deleteMovie, addMovies,
+  getGames, addGame, updateGame, deleteGame, addGames,
   type Movie, type FootballGame,
 } from "@/lib/store";
 
