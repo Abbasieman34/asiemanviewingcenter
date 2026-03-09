@@ -305,6 +305,23 @@ function GameManager() {
     }
   };
 
+  const handleBulkUpload = async () => {
+    try {
+      const parsed = JSON.parse(bulkData) as Array<{ teamA: string; teamB: string; league: string; date: string; time: string }>;
+      if (!Array.isArray(parsed)) throw new Error("Data must be an array");
+      setLoading(true);
+      await addGames(parsed);
+      setGames(await getGames());
+      toast.success(`${parsed.length} games added!`);
+      setBulkData("");
+      setBulkOpen(false);
+    } catch (e) {
+      toast.error("Invalid format. Expected JSON array with fields: teamA, teamB, league, date, time");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section>
       <div className="flex items-center gap-3 mb-6">
