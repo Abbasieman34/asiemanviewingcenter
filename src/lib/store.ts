@@ -167,19 +167,9 @@ export interface UserWithRole {
 }
 
 export async function getAllUsers(): Promise<UserWithRole[]> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("Not authenticated");
-
-  const response = await supabase.functions.invoke("list-users", {
-    method: "GET",
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch users");
-  }
-
-  return response.json();
+  const { data, error } = await supabase.functions.invoke("list-users");
+  if (error) throw new Error(error.message || "Failed to fetch users");
+  return data;
 }
 
 export async function grantAdminRole(userId: string, targetEmail: string): Promise<void> {
