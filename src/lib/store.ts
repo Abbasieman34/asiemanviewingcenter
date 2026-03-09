@@ -157,3 +157,49 @@ export async function addGames(games: Omit<FootballGame, "id">[]): Promise<Footb
     time: g.time,
   }));
 }
+
+/* ── User Role Management ── */
+export interface UserWithRole {
+  id: string;
+  email: string;
+  isAdmin: boolean;
+  createdAt: string;
+}
+
+export async function getAllUsers(): Promise<UserWithRole[]> {
+  // Get all users from auth.users (via admin API)
+  const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+  if (usersError) throw usersError;
+
+  // Get all admin roles
+  const { data: adminRoles, error: rolesError } = await supabase
+    .from("user_roles")
+    .select("user_id")
+    .eq("role", "admin");
+  if (rolesError) throw rolesError;
+
+  const adminUserIds = new Set((adminRoles || []).map((r) => r.user_id));
+
+  return (users || []).map((u) => ({
+    id: u.id,
+    email: u.email || "No email",
+    isAdmin: adminUserIds.has(u.id),
+    createdAt: u.created_at,
+  }));
+}
+
+export async function grantAdminRole(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("user_roles")
+    .insert({ user_id: userId, role: "admin" });
+  if (error) throw error;
+}
+
+export async function revokeAdminRole(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("user_roles")
+    .delete()
+    .eq("user_id", userId)
+    .eq("role", "admin");
+  if (error) throw error;
+}

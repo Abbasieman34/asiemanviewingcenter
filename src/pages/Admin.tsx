@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   getMovies, addMovie, updateMovie, deleteMovie, addMovies,
   getGames, addGame, updateGame, deleteGame, addGames,
-  type Movie, type FootballGame,
+  getAllUsers, grantAdminRole, revokeAdminRole,
+  type Movie, type FootballGame, type UserWithRole,
 } from "@/lib/store";
 
 const Admin = () => {
@@ -70,12 +71,124 @@ const Admin = () => {
             <LogOut className="h-4 w-4 mr-1" /> Sign Out
           </Button>
         </div>
+        <UserManager />
         <MovieManager />
         <GameManager />
       </div>
     </div>
   );
 };
+
+/* ── User Manager ── */
+function UserManager() {
+  const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { user: currentUser } = useAuth();
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast.error("Failed to load users");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
+    if (userId === currentUser?.id) {
+      toast.error("You cannot modify your own admin status");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (isCurrentlyAdmin) {
+        await revokeAdminRole(userId);
+        toast.success("Admin privileges revoked");
+      } else {
+        await grantAdminRole(userId);
+        toast.success("Admin privileges granted");
+      }
+      await loadUsers();
+    } catch (error) {
+      toast.error("Failed to update user role");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section>
+      <div className="flex items-center gap-3 mb-6">
+        <Users className="h-6 w-6 text-primary" />
+        <h2 className="text-3xl text-primary">USER MANAGEMENT</h2>
+      </div>
+
+      {loading && users.length === 0 ? (
+        <p className="text-muted-foreground text-sm">Loading users...</p>
+      ) : users.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No users found.</p>
+      ) : (
+        <div className="space-y-3">
+          {users.map((u) => (
+            <div
+              key={u.id}
+              className="flex items-center gap-4 bg-secondary/50 rounded-lg p-4 border border-border"
+            >
+              <div className="flex-shrink-0">
+                {u.isAdmin ? (
+                  <ShieldCheck className="h-8 w-8 text-primary" />
+                ) : (
+                  <Shield className="h-8 w-8 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground truncate">{u.email}</p>
+                <p className="text-xs text-muted-foreground">
+                  {u.isAdmin ? "Administrator" : "Regular User"} • Joined {new Date(u.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                {u.id === currentUser?.id ? (
+                  <span className="text-xs text-muted-foreground px-3 py-2 bg-secondary rounded-lg">
+                    You
+                  </span>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant={u.isAdmin ? "outline" : "default"}
+                    onClick={() => handleToggleAdmin(u.id, u.isAdmin)}
+                    disabled={loading}
+                    className={u.isAdmin ? "" : "gold-gradient text-primary-foreground font-semibold"}
+                  >
+                    {u.isAdmin ? (
+                      <>
+                        <Shield className="h-4 w-4 mr-1" /> Remove Admin
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="h-4 w-4 mr-1" /> Make Admin
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
 /* ── Movie Manager ── */
 function MovieManager() {
