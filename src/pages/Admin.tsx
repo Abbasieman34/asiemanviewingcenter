@@ -257,6 +257,8 @@ function GameManager() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bulkData, setBulkData] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     getGames().then(setGames).catch(() => toast.error("Failed to load games"));
