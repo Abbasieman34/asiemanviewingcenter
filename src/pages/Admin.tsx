@@ -145,6 +145,23 @@ function MovieManager() {
     }
   };
 
+  const handleBulkUpload = async () => {
+    try {
+      const parsed = JSON.parse(bulkData) as Array<{ title: string; image: string; date: string; time: string; description?: string }>;
+      if (!Array.isArray(parsed)) throw new Error("Data must be an array");
+      setLoading(true);
+      await addMovies(parsed);
+      setMovies(await getMovies());
+      toast.success(`${parsed.length} movies added!`);
+      setBulkData("");
+      setBulkOpen(false);
+    } catch (e) {
+      toast.error("Invalid format. Expected JSON array with fields: title, image, date, time, description (optional)");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section>
       <div className="flex items-center gap-3 mb-6">
