@@ -116,3 +116,44 @@ export async function deleteGame(id: string): Promise<void> {
   const { error } = await supabase.from("football_games").delete().eq("id", id);
   if (error) throw error;
 }
+
+export async function addMovies(movies: Omit<Movie, "id">[]): Promise<Movie[]> {
+  const { data, error } = await supabase
+    .from("movies")
+    .insert(
+      movies.map((m) => ({
+        title: m.title,
+        image: m.image,
+        date: m.date,
+        time: m.time,
+        description: m.description || null,
+      }))
+    )
+    .select();
+  if (error) throw error;
+  return (data || []).map((m) => ({ ...m, description: m.description ?? undefined }));
+}
+
+export async function addGames(games: Omit<FootballGame, "id">[]): Promise<FootballGame[]> {
+  const { data, error } = await supabase
+    .from("football_games")
+    .insert(
+      games.map((g) => ({
+        team_a: g.teamA,
+        team_b: g.teamB,
+        league: g.league,
+        date: g.date,
+        time: g.time,
+      }))
+    )
+    .select();
+  if (error) throw error;
+  return (data || []).map((g) => ({
+    id: g.id,
+    teamA: g.team_a,
+    teamB: g.team_b,
+    league: g.league,
+    date: g.date,
+    time: g.time,
+  }));
+}

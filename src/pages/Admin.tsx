@@ -329,6 +329,44 @@ function GameManager() {
         <h2 className="text-3xl text-primary">MANAGE FOOTBALL GAMES</h2>
       </div>
 
+      <Collapsible open={bulkOpen} onOpenChange={setBulkOpen} className="mb-6">
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span className="flex items-center gap-2">
+              <Upload className="h-4 w-4" /> Bulk Upload Games
+            </span>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Paste a JSON array of football games. Example:
+            </p>
+            <pre className="bg-secondary/50 p-3 rounded text-xs overflow-x-auto">
+{`[
+  {
+    "teamA": "Manchester United",
+    "teamB": "Liverpool",
+    "league": "Premier League",
+    "date": "2026-03-15",
+    "time": "15:00"
+  }
+]`}
+            </pre>
+            <Textarea
+              placeholder="Paste JSON array here..."
+              value={bulkData}
+              onChange={(e) => setBulkData(e.target.value)}
+              rows={8}
+              className="font-mono text-xs"
+            />
+            <Button onClick={handleBulkUpload} disabled={loading || !bulkData}>
+              <Upload className="h-4 w-4 mr-2" /> Upload {bulkData ? `(${bulkData.split('"teamA"').length - 1} games)` : ""}
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
       <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input placeholder="Team A" value={teamA} onChange={(e) => setTeamA(e.target.value)} />
