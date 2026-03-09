@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getMovies, addMovie, updateMovie, deleteMovie, addMovies,
   getGames, addGame, updateGame, deleteGame, addGames,
-  getAllUsers, grantAdminRole, revokeAdminRole,
-  type Movie, type FootballGame, type UserWithRole,
+  getAllUsers, grantAdminRole, revokeAdminRole, getActivityLogs,
+  type Movie, type FootballGame, type UserWithRole, type ActivityLog,
 } from "@/lib/store";
 
 const Admin = () => {
