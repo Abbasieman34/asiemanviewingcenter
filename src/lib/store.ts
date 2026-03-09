@@ -167,25 +167,26 @@ export interface UserWithRole {
 }
 
 export async function getAllUsers(): Promise<UserWithRole[]> {
-  // Get all users from auth.users (via admin API)
-  const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
-  if (usersError) throw usersError;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
 
-  // Get all admin roles
-  const { data: adminRoles, error: rolesError } = await supabase
-    .from("user_roles")
-    .select("user_id")
-    .eq("role", "admin");
-  if (rolesError) throw rolesError;
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/list-users`,
+    {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-  const adminUserIds = new Set((adminRoles || []).map((r) => r.user_id));
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch users");
+  }
 
-  return (users || []).map((u) => ({
-    id: u.id,
-    email: u.email || "No email",
-    isAdmin: adminUserIds.has(u.id),
-    createdAt: u.created_at,
-  }));
+  return response.json();
 }
 
 export async function grantAdminRole(userId: string, targetEmail: string): Promise<void> {
