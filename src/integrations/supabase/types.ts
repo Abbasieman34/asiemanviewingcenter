@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          performed_by_email: string
+          performed_by_id: string
+          target_user_email: string
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          performed_by_email: string
+          performed_by_id: string
+          target_user_email: string
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          performed_by_email?: string
+          performed_by_id?: string
+          target_user_email?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       football_games: {
         Row: {
           created_at: string
