@@ -120,13 +120,28 @@ const Login = () => {
               </div>
             )}
             {!isForgotPassword && !isSignUp && (
-              <button
-                type="button"
-                onClick={() => setIsForgotPassword(true)}
-                className="text-xs text-primary hover:underline w-full text-right"
-              >
-                Forgot password?
-              </button>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Remember me
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
             )}
             <Button
               onClick={isForgotPassword ? handleForgotPassword : handleEmailAuth}
