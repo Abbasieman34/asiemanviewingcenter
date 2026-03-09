@@ -12,6 +12,8 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         <img
           src={movie.image}
           alt={movie.title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
         />
       </div>
