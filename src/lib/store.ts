@@ -170,16 +170,9 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/list-users`,
-    {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await supabase.functions.invoke("list-users", {
+    method: "GET",
+  });
 
   if (!response.ok) {
     const error = await response.json();
