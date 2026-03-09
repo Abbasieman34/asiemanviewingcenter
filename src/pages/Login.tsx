@@ -78,6 +78,17 @@ const Login = () => {
     }
   };
 
+  const handleAppleLogin = async () => {
+    setLoading(true);
+    const { error } = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    if (error) {
+      toast.error("Apple sign-in failed");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
