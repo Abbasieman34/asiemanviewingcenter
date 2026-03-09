@@ -121,10 +121,12 @@ function UserManager() {
     try {
       setLoading(true);
       if (isCurrentlyAdmin) {
-        await revokeAdminRole(userId);
+        const targetUser = users.find(u => u.id === userId);
+        await revokeAdminRole(userId, targetUser?.email || "unknown");
         toast.success("Admin privileges revoked");
       } else {
-        await grantAdminRole(userId);
+        const targetUser = users.find(u => u.id === userId);
+        await grantAdminRole(userId, targetUser?.email || "unknown");
         toast.success("Admin privileges granted");
       }
       await loadUsers();
