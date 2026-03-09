@@ -169,6 +169,44 @@ function MovieManager() {
         <h2 className="text-3xl text-primary">MANAGE MOVIES</h2>
       </div>
 
+      <Collapsible open={bulkOpen} onOpenChange={setBulkOpen} className="mb-6">
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span className="flex items-center gap-2">
+              <Upload className="h-4 w-4" /> Bulk Upload Movies
+            </span>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Paste a JSON array of movies. Example:
+            </p>
+            <pre className="bg-secondary/50 p-3 rounded text-xs overflow-x-auto">
+{`[
+  {
+    "title": "Movie 1",
+    "image": "data:image/png;base64,...",
+    "date": "2026-03-15",
+    "time": "20:00",
+    "description": "Optional"
+  }
+]`}
+            </pre>
+            <Textarea
+              placeholder="Paste JSON array here..."
+              value={bulkData}
+              onChange={(e) => setBulkData(e.target.value)}
+              rows={8}
+              className="font-mono text-xs"
+            />
+            <Button onClick={handleBulkUpload} disabled={loading || !bulkData}>
+              <Upload className="h-4 w-4 mr-2" /> Upload {bulkData ? `(${bulkData.split('"title"').length - 1} movies)` : ""}
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
       <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input placeholder="Movie title" value={title} onChange={(e) => setTitle(e.target.value)} />
