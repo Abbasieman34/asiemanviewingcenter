@@ -531,4 +531,62 @@ function GameManager() {
   );
 }
 
+/* ── Activity Log Viewer ── */
+function ActivityLogViewer() {
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    getActivityLogs()
+      .then(setLogs)
+      .catch(() => toast.error("Failed to load activity logs"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <section>
+      <div className="flex items-center gap-3 mb-6">
+        <History className="h-6 w-6 text-primary" />
+        <h2 className="text-3xl text-primary">ACTIVITY LOG</h2>
+      </div>
+
+      {loading ? (
+        <p className="text-muted-foreground text-sm">Loading logs...</p>
+      ) : logs.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No activity recorded yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {logs.map((log) => (
+            <div
+              key={log.id}
+              className="flex items-start gap-4 bg-secondary/50 rounded-lg p-4 border border-border"
+            >
+              <div className={`flex-shrink-0 mt-0.5 ${log.action === "grant_admin" ? "text-green-500" : "text-destructive"}`}>
+                {log.action === "grant_admin" ? (
+                  <ShieldCheck className="h-5 w-5" />
+                ) : (
+                  <Shield className="h-5 w-5" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground">
+                  <span className="font-semibold">{log.performedByEmail}</span>
+                  {" "}
+                  {log.action === "grant_admin" ? "granted admin to" : "revoked admin from"}
+                  {" "}
+                  <span className="font-semibold">{log.targetUserEmail}</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {new Date(log.createdAt).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default Admin;
