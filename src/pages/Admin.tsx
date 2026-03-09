@@ -65,16 +65,25 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8 space-y-12">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">Signed in as <span className="text-foreground">{user.email}</span></p>
           <Button variant="outline" size="sm" onClick={signOut}>
             <LogOut className="h-4 w-4 mr-1" /> Sign Out
           </Button>
         </div>
-        <UserManager />
-        <MovieManager />
-        <GameManager />
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="users"><Users className="h-4 w-4 mr-1" /> Users</TabsTrigger>
+            <TabsTrigger value="activity"><History className="h-4 w-4 mr-1" /> Activity Log</TabsTrigger>
+            <TabsTrigger value="movies"><Film className="h-4 w-4 mr-1" /> Movies</TabsTrigger>
+            <TabsTrigger value="games"><Tv className="h-4 w-4 mr-1" /> Games</TabsTrigger>
+          </TabsList>
+          <TabsContent value="users"><UserManager /></TabsContent>
+          <TabsContent value="activity"><ActivityLogViewer /></TabsContent>
+          <TabsContent value="movies"><MovieManager /></TabsContent>
+          <TabsContent value="games"><GameManager /></TabsContent>
+        </Tabs>
       </div>
     </div>
   );
