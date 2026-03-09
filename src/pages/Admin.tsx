@@ -71,6 +71,7 @@ const Admin = () => {
             <LogOut className="h-4 w-4 mr-1" /> Sign Out
           </Button>
         </div>
+        <UserManager />
         <MovieManager />
         <GameManager />
       </div>
