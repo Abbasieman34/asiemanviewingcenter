@@ -188,18 +188,63 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
   }));
 }
 
-export async function grantAdminRole(userId: string): Promise<void> {
+export async function grantAdminRole(userId: string, targetEmail: string): Promise<void> {
   const { error } = await supabase
     .from("user_roles")
     .insert({ user_id: userId, role: "admin" });
   if (error) throw error;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    await supabase.from("admin_activity_log").insert({
+      action: "grant_admin",
+      target_user_id: userId,
+      target_user_email: targetEmail,
+      performed_by_id: user.id,
+      performed_by_email: user.email || "unknown",
+    });
+  }
 }
 
-export async function revokeAdminRole(userId: string): Promise<void> {
+export async function revokeAdminRole(userId: string, targetEmail: string): Promise<void> {
   const { error } = await supabase
     .from("user_roles")
     .delete()
     .eq("user_id", userId)
     .eq("role", "admin");
   if (error) throw error;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    await supabase.from("admin_activity_log").insert({
+      action: "revoke_admin",
+      target_user_id: userId,
+      target_user_email: targetEmail,
+      performed_by_id: user.id,
+      performed_by_email: user.email || "unknown",
+    });
+  }
+}
+
+export interface ActivityLog {
+  id: string;
+  action: string;
+  targetUserEmail: string;
+  performedByEmail: string;
+  createdAt: string;
+}
+
+export async function getActivityLogs(): Promise<ActivityLog[]> {
+  const { data, error } = await supabase
+    .from("admin_activity_log")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data || []).map((l) => ({
+    id: l.id,
+    action: l.action,
+    targetUserEmail: l.target_user_email,
+    performedByEmail: l.performed_by_email,
+    createdAt: l.created_at,
+  }));
 }

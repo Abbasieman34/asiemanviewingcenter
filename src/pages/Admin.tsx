@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getMovies, addMovie, updateMovie, deleteMovie, addMovies,
   getGames, addGame, updateGame, deleteGame, addGames,
-  getAllUsers, grantAdminRole, revokeAdminRole,
-  type Movie, type FootballGame, type UserWithRole,
+  getAllUsers, grantAdminRole, revokeAdminRole, getActivityLogs,
+  type Movie, type FootballGame, type UserWithRole, type ActivityLog,
 } from "@/lib/store";
 
 const Admin = () => {
@@ -64,16 +65,25 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8 space-y-12">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">Signed in as <span className="text-foreground">{user.email}</span></p>
           <Button variant="outline" size="sm" onClick={signOut}>
             <LogOut className="h-4 w-4 mr-1" /> Sign Out
           </Button>
         </div>
-        <UserManager />
-        <MovieManager />
-        <GameManager />
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="users"><Users className="h-4 w-4 mr-1" /> Users</TabsTrigger>
+            <TabsTrigger value="activity"><History className="h-4 w-4 mr-1" /> Activity Log</TabsTrigger>
+            <TabsTrigger value="movies"><Film className="h-4 w-4 mr-1" /> Movies</TabsTrigger>
+            <TabsTrigger value="games"><Tv className="h-4 w-4 mr-1" /> Games</TabsTrigger>
+          </TabsList>
+          <TabsContent value="users"><UserManager /></TabsContent>
+          <TabsContent value="activity"><ActivityLogViewer /></TabsContent>
+          <TabsContent value="movies"><MovieManager /></TabsContent>
+          <TabsContent value="games"><GameManager /></TabsContent>
+        </Tabs>
       </div>
     </div>
   );
@@ -111,10 +121,12 @@ function UserManager() {
     try {
       setLoading(true);
       if (isCurrentlyAdmin) {
-        await revokeAdminRole(userId);
+        const targetUser = users.find(u => u.id === userId);
+        await revokeAdminRole(userId, targetUser?.email || "unknown");
         toast.success("Admin privileges revoked");
       } else {
-        await grantAdminRole(userId);
+        const targetUser = users.find(u => u.id === userId);
+        await grantAdminRole(userId, targetUser?.email || "unknown");
         toast.success("Admin privileges granted");
       }
       await loadUsers();
@@ -510,6 +522,64 @@ function GameManager() {
               <div className="flex gap-2 flex-shrink-0">
                 <Button size="icon" variant="ghost" onClick={() => handleEdit(g)}><Pencil className="h-4 w-4" /></Button>
                 <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(g.id)}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ── Activity Log Viewer ── */
+function ActivityLogViewer() {
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    getActivityLogs()
+      .then(setLogs)
+      .catch(() => toast.error("Failed to load activity logs"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <section>
+      <div className="flex items-center gap-3 mb-6">
+        <History className="h-6 w-6 text-primary" />
+        <h2 className="text-3xl text-primary">ACTIVITY LOG</h2>
+      </div>
+
+      {loading ? (
+        <p className="text-muted-foreground text-sm">Loading logs...</p>
+      ) : logs.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No activity recorded yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {logs.map((log) => (
+            <div
+              key={log.id}
+              className="flex items-start gap-4 bg-secondary/50 rounded-lg p-4 border border-border"
+            >
+              <div className={`flex-shrink-0 mt-0.5 ${log.action === "grant_admin" ? "text-green-500" : "text-destructive"}`}>
+                {log.action === "grant_admin" ? (
+                  <ShieldCheck className="h-5 w-5" />
+                ) : (
+                  <Shield className="h-5 w-5" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground">
+                  <span className="font-semibold">{log.performedByEmail}</span>
+                  {" "}
+                  {log.action === "grant_admin" ? "granted admin to" : "revoked admin from"}
+                  {" "}
+                  <span className="font-semibold">{log.targetUserEmail}</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {new Date(log.createdAt).toLocaleString()}
+                </p>
               </div>
             </div>
           ))}
