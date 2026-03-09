@@ -11,7 +11,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   getMovies, addMovie, updateMovie, deleteMovie, addMovies,
   getGames, addGame, updateGame, deleteGame, addGames,
-  type Movie, type FootballGame,
+  getAllUsers, grantAdminRole, revokeAdminRole,
+  type Movie, type FootballGame, type UserWithRole,
 } from "@/lib/store";
 
 const Admin = () => {
