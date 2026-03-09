@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert } from "lucide-react";
+import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  getMovies, addMovie, updateMovie, deleteMovie,
-  getGames, addGame, updateGame, deleteGame,
+  getMovies, addMovie, updateMovie, deleteMovie, addMovies,
+  getGames, addGame, updateGame, deleteGame, addGames,
   type Movie, type FootballGame,
 } from "@/lib/store";
 
@@ -87,6 +88,8 @@ function MovieManager() {
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [bulkData, setBulkData] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     getMovies().then(setMovies).catch(() => toast.error("Failed to load movies"));
@@ -142,12 +145,67 @@ function MovieManager() {
     }
   };
 
+  const handleBulkUpload = async () => {
+    try {
+      const parsed = JSON.parse(bulkData) as Array<{ title: string; image: string; date: string; time: string; description?: string }>;
+      if (!Array.isArray(parsed)) throw new Error("Data must be an array");
+      setLoading(true);
+      await addMovies(parsed);
+      setMovies(await getMovies());
+      toast.success(`${parsed.length} movies added!`);
+      setBulkData("");
+      setBulkOpen(false);
+    } catch (e) {
+      toast.error("Invalid format. Expected JSON array with fields: title, image, date, time, description (optional)");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section>
       <div className="flex items-center gap-3 mb-6">
         <Film className="h-6 w-6 text-primary" />
         <h2 className="text-3xl text-primary">MANAGE MOVIES</h2>
       </div>
+
+      <Collapsible open={bulkOpen} onOpenChange={setBulkOpen} className="mb-6">
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span className="flex items-center gap-2">
+              <Upload className="h-4 w-4" /> Bulk Upload Movies
+            </span>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Paste a JSON array of movies. Example:
+            </p>
+            <pre className="bg-secondary/50 p-3 rounded text-xs overflow-x-auto">
+{`[
+  {
+    "title": "Movie 1",
+    "image": "data:image/png;base64,...",
+    "date": "2026-03-15",
+    "time": "20:00",
+    "description": "Optional"
+  }
+]`}
+            </pre>
+            <Textarea
+              placeholder="Paste JSON array here..."
+              value={bulkData}
+              onChange={(e) => setBulkData(e.target.value)}
+              rows={8}
+              className="font-mono text-xs"
+            />
+            <Button onClick={handleBulkUpload} disabled={loading || !bulkData}>
+              <Upload className="h-4 w-4 mr-2" /> Upload {bulkData ? `(${bulkData.split('"title"').length - 1} movies)` : ""}
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -199,6 +257,8 @@ function GameManager() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bulkData, setBulkData] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     getGames().then(setGames).catch(() => toast.error("Failed to load games"));
@@ -245,12 +305,67 @@ function GameManager() {
     }
   };
 
+  const handleBulkUpload = async () => {
+    try {
+      const parsed = JSON.parse(bulkData) as Array<{ teamA: string; teamB: string; league: string; date: string; time: string }>;
+      if (!Array.isArray(parsed)) throw new Error("Data must be an array");
+      setLoading(true);
+      await addGames(parsed);
+      setGames(await getGames());
+      toast.success(`${parsed.length} games added!`);
+      setBulkData("");
+      setBulkOpen(false);
+    } catch (e) {
+      toast.error("Invalid format. Expected JSON array with fields: teamA, teamB, league, date, time");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section>
       <div className="flex items-center gap-3 mb-6">
         <Tv className="h-6 w-6 text-primary" />
         <h2 className="text-3xl text-primary">MANAGE FOOTBALL GAMES</h2>
       </div>
+
+      <Collapsible open={bulkOpen} onOpenChange={setBulkOpen} className="mb-6">
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span className="flex items-center gap-2">
+              <Upload className="h-4 w-4" /> Bulk Upload Games
+            </span>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Paste a JSON array of football games. Example:
+            </p>
+            <pre className="bg-secondary/50 p-3 rounded text-xs overflow-x-auto">
+{`[
+  {
+    "teamA": "Manchester United",
+    "teamB": "Liverpool",
+    "league": "Premier League",
+    "date": "2026-03-15",
+    "time": "15:00"
+  }
+]`}
+            </pre>
+            <Textarea
+              placeholder="Paste JSON array here..."
+              value={bulkData}
+              onChange={(e) => setBulkData(e.target.value)}
+              rows={8}
+              className="font-mono text-xs"
+            />
+            <Button onClick={handleBulkUpload} disabled={loading || !bulkData}>
+              <Upload className="h-4 w-4 mr-2" /> Upload {bulkData ? `(${bulkData.split('"teamA"').length - 1} games)` : ""}
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
