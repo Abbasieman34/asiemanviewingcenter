@@ -88,6 +88,8 @@ function MovieManager() {
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [bulkData, setBulkData] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     getMovies().then(setMovies).catch(() => toast.error("Failed to load movies"));
