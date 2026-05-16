@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Film, Tv, Phone, Mail, MessageCircle } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import MovieCard from "@/components/MovieCard";
 import GameCard from "@/components/GameCard";
@@ -16,8 +17,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Asieman Viewing Center — Movies & Live Football</title>
+        <meta name="description" content="Catch the latest movies and watch live football matches at Asieman Viewing Center, Kofar Kudu Kazaure. See today's schedule." />
+        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/" />
+        <meta property="og:title" content="Asieman Viewing Center — Movies & Live Football" />
+        <meta property="og:description" content="Catch the latest movies and watch live football matches at Asieman Viewing Center, Kofar Kudu Kazaure." />
+        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
 
+      <main>
       {/* Hero */}
       <section className="relative py-16 md:py-24 text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
@@ -25,9 +36,9 @@ const Index = () => {
           <div className="inline-flex items-center gap-2 gold-gradient px-4 py-1.5 rounded-full text-primary-foreground text-sm font-medium mb-6">
             <Tv className="h-4 w-4" /> Now Showing
           </div>
-          <h2 className="text-5xl md:text-7xl text-primary mb-3">
+          <h1 className="text-5xl md:text-7xl text-primary mb-3">
             ASIEMAN VIEWING CENTER
-          </h2>
+          </h1>
           <p className="text-lg text-muted-foreground tracking-widest">
             KOFAR KUDU KAZAURE — MOVIES & LIVE FOOTBALL
           </p>
@@ -133,6 +144,7 @@ const Index = () => {
           </a>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">

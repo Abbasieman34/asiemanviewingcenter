@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,8 +65,16 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Admin Dashboard — Asieman Viewing Center</title>
+        <meta name="description" content="Manage movies, football schedules, users and activity for Asieman Viewing Center." />
+        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/admin" />
+        <meta name="robots" content="noindex" />
+        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/admin" />
+      </Helmet>
       <Header />
       <div className="container mx-auto px-4 py-8 space-y-8">
+        <h1 className="sr-only">Admin Dashboard</h1>
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">Signed in as <span className="text-foreground">{user.email}</span></p>
           <Button variant="outline" size="sm" onClick={signOut}>

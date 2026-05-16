@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,12 +92,21 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Admin Login — Asieman Viewing Center</title>
+        <meta name="description" content="Sign in to manage movies and football schedules for Asieman Viewing Center, Kofar Kudu Kazaure." />
+        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/login" />
+        <meta property="og:title" content="Admin Login — Asieman Viewing Center" />
+        <meta property="og:description" content="Sign in to manage movies and football schedules." />
+        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/login" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
       <div className="flex items-center justify-center py-20 px-4">
         <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-6">
           <div className="flex items-center gap-2 justify-center text-primary">
             <Lock className="h-6 w-6" />
-            <h2 className="text-2xl">{isForgotPassword ? "RESET PASSWORD" : "ADMIN LOGIN"}</h2>
+            <h1 className="text-2xl">{isForgotPassword ? "RESET PASSWORD" : "ADMIN LOGIN"}</h1>
           </div>
 
           <div className="space-y-3">
@@ -104,6 +114,7 @@ const Login = () => {
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="email"
+                aria-label="Email address"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -115,6 +126,7 @@ const Login = () => {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type={showPassword ? "text" : "password"}
+                  aria-label="Password"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -123,6 +135,7 @@ const Login = () => {
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
