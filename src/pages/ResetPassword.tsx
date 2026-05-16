@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Eye, EyeOff } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,12 @@ const ResetPassword = () => {
   if (!isRecovery) {
     return (
       <div className="min-h-screen bg-background">
+        <Helmet>
+          <title>Reset Password — Asieman Viewing Center</title>
+          <meta name="description" content="Set a new password for your Asieman Viewing Center admin account." />
+          <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/reset-password" />
+          <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/reset-password" />
+        </Helmet>
         <Header />
         <div className="flex items-center justify-center py-20 px-4">
           <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-4 text-center">
@@ -76,12 +83,18 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Reset Password — Asieman Viewing Center</title>
+        <meta name="description" content="Set a new password for your Asieman Viewing Center admin account." />
+        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/reset-password" />
+        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/reset-password" />
+      </Helmet>
       <Header />
       <div className="flex items-center justify-center py-20 px-4">
         <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-6">
           <div className="flex items-center gap-2 justify-center text-primary">
             <Lock className="h-6 w-6" />
-            <h2 className="text-2xl">RESET PASSWORD</h2>
+            <h1 className="text-2xl">RESET PASSWORD</h1>
           </div>
 
           <div className="space-y-3">
@@ -89,6 +102,7 @@ const ResetPassword = () => {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type={showPassword ? "text" : "password"}
+                aria-label="New password"
                 placeholder="New password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -96,6 +110,7 @@ const ResetPassword = () => {
               />
               <button
                 type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
@@ -106,6 +121,7 @@ const ResetPassword = () => {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type={showPassword ? "text" : "password"}
+                aria-label="Confirm new password"
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
