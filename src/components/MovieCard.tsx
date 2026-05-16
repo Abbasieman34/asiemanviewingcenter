@@ -11,7 +11,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       <div className="aspect-[2/3] overflow-hidden">
         <img
           src={movie.image}
-          alt={movie.title}
+          alt={`Movie poster for ${movie.title}`}
           loading="lazy"
           decoding="async"
           className="w-full h-full object-cover"
