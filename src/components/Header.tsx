@@ -15,9 +15,9 @@ const Header = () => {
             <Tv className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl leading-none text-primary">
+            <span className="block text-xl md:text-2xl leading-none text-primary">
               ASIEMAN VIEWING CENTER
-            </h1>
+            </span>
             <p className="text-xs text-muted-foreground tracking-widest">
               KOFAR KUDU KAZAURE
             </p>
