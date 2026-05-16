@@ -133,6 +133,7 @@ const Index = () => {
           </a>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
