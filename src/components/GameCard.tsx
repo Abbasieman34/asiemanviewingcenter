@@ -1,4 +1,5 @@
-import { Calendar, Clock, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
+import DateTimeDisplay from "@/components/DateTimeDisplay";
 import type { FootballGame } from "@/lib/store";
 
 interface GameCardProps {
@@ -17,16 +18,7 @@ const GameCard = ({ game }: GameCardProps) => {
         <span className="text-sm font-bold text-primary gold-gradient px-3 py-1 rounded-full text-primary-foreground">VS</span>
         <span className="text-2xl font-display flex-1 text-center text-foreground">{game.teamB}</span>
       </div>
-      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Calendar className="h-3.5 w-3.5 text-primary" />
-          {game.date}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3.5 w-3.5 text-primary" />
-          {game.time}
-        </span>
-      </div>
+      <DateTimeDisplay date={game.date} time={game.time} className="justify-center" />
     </div>
   );
 };

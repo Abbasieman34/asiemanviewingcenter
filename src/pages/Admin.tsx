@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, Pencil, Plus, Film, Tv, LogOut, ShieldAlert, Upload, Users, Shield, ShieldCheck, History } from "lucide-react";
+import { Plus, Film, Tv, LogOut, ShieldAlert, Users, Shield, ShieldCheck, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import PageLayout from "@/components/PageLayout";
 import Header from "@/components/Header";
+import SectionHeader from "@/components/SectionHeader";
+import EmptyState from "@/components/EmptyState";
+import BulkUploadSection from "@/components/BulkUploadSection";
+import AdminItemActions from "@/components/AdminItemActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getMovies, addMovie, updateMovie, deleteMovie, addMovies,
@@ -64,15 +67,12 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Admin Dashboard — Asieman Viewing Center</title>
-        <meta name="description" content="Manage movies, football schedules, users and activity for Asieman Viewing Center." />
-        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/admin" />
-        <meta name="robots" content="noindex" />
-        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/admin" />
-      </Helmet>
-      <Header />
+    <PageLayout
+      title="Admin Dashboard — Asieman Viewing Center"
+      description="Manage movies, football schedules, users and activity for Asieman Viewing Center."
+      canonicalPath="/admin"
+      noIndex
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
         <h1 className="sr-only">Admin Dashboard</h1>
         <div className="flex items-center justify-between">
@@ -94,7 +94,7 @@ const Admin = () => {
           <TabsContent value="games"><GameManager /></TabsContent>
         </Tabs>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
@@ -149,15 +149,12 @@ function UserManager() {
 
   return (
     <section>
-      <div className="flex items-center gap-3 mb-6">
-        <Users className="h-6 w-6 text-primary" />
-        <h2 className="text-3xl text-primary">USER MANAGEMENT</h2>
-      </div>
+      <SectionHeader icon={Users} title="USER MANAGEMENT" />
 
       {loading && users.length === 0 ? (
-        <p className="text-muted-foreground text-sm">Loading users...</p>
+        <EmptyState message="Loading users..." />
       ) : users.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No users found.</p>
+        <EmptyState message="No users found." />
       ) : (
         <div className="space-y-3">
           {users.map((u) => (
@@ -296,28 +293,7 @@ function MovieManager() {
     }
   };
 
-  return (
-    <section>
-      <div className="flex items-center gap-3 mb-6">
-        <Film className="h-6 w-6 text-primary" />
-        <h2 className="text-3xl text-primary">MANAGE MOVIES</h2>
-      </div>
-
-      <Collapsible open={bulkOpen} onOpenChange={setBulkOpen} className="mb-6">
-        <CollapsibleTrigger asChild>
-          <Button variant="outline" className="w-full justify-between">
-            <span className="flex items-center gap-2">
-              <Upload className="h-4 w-4" /> Bulk Upload Movies
-            </span>
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Paste a JSON array of movies. Example:
-            </p>
-            <pre className="bg-secondary/50 p-3 rounded text-xs overflow-x-auto">
-{`[
+  const movieBulkExample = `[
   {
     "title": "Movie 1",
     "image": "data:image/png;base64,...",
@@ -325,21 +301,23 @@ function MovieManager() {
     "time": "20:00",
     "description": "Optional"
   }
-]`}
-            </pre>
-            <Textarea
-              placeholder="Paste JSON array here..."
-              value={bulkData}
-              onChange={(e) => setBulkData(e.target.value)}
-              rows={8}
-              className="font-mono text-xs"
-            />
-            <Button onClick={handleBulkUpload} disabled={loading || !bulkData}>
-              <Upload className="h-4 w-4 mr-2" /> Upload {bulkData ? `(${bulkData.split('"title"').length - 1} movies)` : ""}
-            </Button>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+]`;
+
+  return (
+    <section>
+      <SectionHeader icon={Film} title="MANAGE MOVIES" />
+
+      <BulkUploadSection
+        entityName="Movies"
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        exampleJson={movieBulkExample}
+        bulkData={bulkData}
+        onBulkDataChange={setBulkData}
+        onUpload={handleBulkUpload}
+        loading={loading}
+        countKey="title"
+      />
 
       <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -359,7 +337,7 @@ function MovieManager() {
       </div>
 
       {movies.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No movies yet.</p>
+        <EmptyState message="No movies yet." />
       ) : (
         <div className="space-y-3">
           {movies.map((m) => (
@@ -369,10 +347,7 @@ function MovieManager() {
                 <p className="font-semibold text-foreground truncate">{m.title}</p>
                 <p className="text-xs text-muted-foreground">{m.date} at {m.time}</p>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <Button size="icon" variant="ghost" onClick={() => handleEdit(m)}><Pencil className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(m.id)}><Trash2 className="h-4 w-4" /></Button>
-              </div>
+              <AdminItemActions onEdit={() => handleEdit(m)} onDelete={() => handleDelete(m.id)} />
             </div>
           ))}
         </div>
@@ -456,28 +431,7 @@ function GameManager() {
     }
   };
 
-  return (
-    <section>
-      <div className="flex items-center gap-3 mb-6">
-        <Tv className="h-6 w-6 text-primary" />
-        <h2 className="text-3xl text-primary">MANAGE FOOTBALL GAMES</h2>
-      </div>
-
-      <Collapsible open={bulkOpen} onOpenChange={setBulkOpen} className="mb-6">
-        <CollapsibleTrigger asChild>
-          <Button variant="outline" className="w-full justify-between">
-            <span className="flex items-center gap-2">
-              <Upload className="h-4 w-4" /> Bulk Upload Games
-            </span>
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Paste a JSON array of football games. Example:
-            </p>
-            <pre className="bg-secondary/50 p-3 rounded text-xs overflow-x-auto">
-{`[
+  const gameBulkExample = `[
   {
     "teamA": "Manchester United",
     "teamB": "Liverpool",
@@ -485,21 +439,23 @@ function GameManager() {
     "date": "2026-03-15",
     "time": "15:00"
   }
-]`}
-            </pre>
-            <Textarea
-              placeholder="Paste JSON array here..."
-              value={bulkData}
-              onChange={(e) => setBulkData(e.target.value)}
-              rows={8}
-              className="font-mono text-xs"
-            />
-            <Button onClick={handleBulkUpload} disabled={loading || !bulkData}>
-              <Upload className="h-4 w-4 mr-2" /> Upload {bulkData ? `(${bulkData.split('"teamA"').length - 1} games)` : ""}
-            </Button>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+]`;
+
+  return (
+    <section>
+      <SectionHeader icon={Tv} title="MANAGE FOOTBALL GAMES" />
+
+      <BulkUploadSection
+        entityName="Games"
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        exampleJson={gameBulkExample}
+        bulkData={bulkData}
+        onBulkDataChange={setBulkData}
+        onUpload={handleBulkUpload}
+        loading={loading}
+        countKey="teamA"
+      />
 
       <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -519,7 +475,7 @@ function GameManager() {
       </div>
 
       {games.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No games yet.</p>
+        <EmptyState message="No games yet." />
       ) : (
         <div className="space-y-3">
           {games.map((g) => (
@@ -528,10 +484,7 @@ function GameManager() {
                 <p className="font-semibold text-foreground">{g.teamA} vs {g.teamB}</p>
                 <p className="text-xs text-muted-foreground">{g.league} — {g.date} at {g.time}</p>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <Button size="icon" variant="ghost" onClick={() => handleEdit(g)}><Pencil className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(g.id)}><Trash2 className="h-4 w-4" /></Button>
-              </div>
+              <AdminItemActions onEdit={() => handleEdit(g)} onDelete={() => handleDelete(g.id)} />
             </div>
           ))}
         </div>
@@ -555,15 +508,12 @@ function ActivityLogViewer() {
 
   return (
     <section>
-      <div className="flex items-center gap-3 mb-6">
-        <History className="h-6 w-6 text-primary" />
-        <h2 className="text-3xl text-primary">ACTIVITY LOG</h2>
-      </div>
+      <SectionHeader icon={History} title="ACTIVITY LOG" />
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Loading logs...</p>
+        <EmptyState message="Loading logs..." />
       ) : logs.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No activity recorded yet.</p>
+        <EmptyState message="No activity recorded yet." />
       ) : (
         <div className="space-y-3">
           {logs.map((log) => (

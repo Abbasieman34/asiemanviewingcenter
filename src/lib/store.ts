@@ -172,22 +172,29 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
   return data;
 }
 
-export async function grantAdminRole(userId: string, targetEmail: string): Promise<void> {
-  const { error } = await supabase
-    .from("user_roles")
-    .insert({ user_id: userId, role: "admin" });
-  if (error) throw error;
-
+async function logAdminActivity(
+  action: string,
+  targetUserId: string,
+  targetEmail: string,
+): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
     await supabase.from("admin_activity_log").insert({
-      action: "grant_admin",
-      target_user_id: userId,
+      action,
+      target_user_id: targetUserId,
       target_user_email: targetEmail,
       performed_by_id: user.id,
       performed_by_email: user.email || "unknown",
     });
   }
+}
+
+export async function grantAdminRole(userId: string, targetEmail: string): Promise<void> {
+  const { error } = await supabase
+    .from("user_roles")
+    .insert({ user_id: userId, role: "admin" });
+  if (error) throw error;
+  await logAdminActivity("grant_admin", userId, targetEmail);
 }
 
 export async function revokeAdminRole(userId: string, targetEmail: string): Promise<void> {
@@ -197,17 +204,7 @@ export async function revokeAdminRole(userId: string, targetEmail: string): Prom
     .eq("user_id", userId)
     .eq("role", "admin");
   if (error) throw error;
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    await supabase.from("admin_activity_log").insert({
-      action: "revoke_admin",
-      target_user_id: userId,
-      target_user_email: targetEmail,
-      performed_by_id: user.id,
-      performed_by_email: user.email || "unknown",
-    });
-  }
+  await logAdminActivity("revoke_admin", userId, targetEmail);
 }
 
 export interface ActivityLog {

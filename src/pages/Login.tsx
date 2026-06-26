@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
-import { Helmet } from "react-helmet-async";
-import Header from "@/components/Header";
+import { Lock, Mail } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
+import PasswordInput from "@/components/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -91,17 +91,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Admin Login — Asieman Viewing Center</title>
-        <meta name="description" content="Sign in to manage movies and football schedules for Asieman Viewing Center, Kofar Kudu Kazaure." />
-        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/login" />
-        <meta property="og:title" content="Admin Login — Asieman Viewing Center" />
-        <meta property="og:description" content="Sign in to manage movies and football schedules." />
-        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/login" />
-        <meta property="og:type" content="website" />
-      </Helmet>
-      <Header />
+    <PageLayout
+      title="Admin Login — Asieman Viewing Center"
+      description="Sign in to manage movies and football schedules for Asieman Viewing Center, Kofar Kudu Kazaure."
+      canonicalPath="/login"
+      ogTitle="Admin Login — Asieman Viewing Center"
+      ogDescription="Sign in to manage movies and football schedules."
+    >
       <div className="flex items-center justify-center py-20 px-4">
         <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-6">
           <div className="flex items-center gap-2 justify-center text-primary">
@@ -122,26 +118,13 @@ const Login = () => {
               />
             </div>
             {!isForgotPassword && (
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  aria-label="Password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
-                  className="pl-10 pr-10"
-                />
-                <button
-                  type="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+              <PasswordInput
+                value={password}
+                onChange={setPassword}
+                showPassword={showPassword}
+                onToggleVisibility={() => setShowPassword(!showPassword)}
+                onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
+              />
             )}
             {!isForgotPassword && !isSignUp && (
               <div className="flex items-center justify-between">
@@ -238,7 +221,7 @@ const Login = () => {
           </p>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
