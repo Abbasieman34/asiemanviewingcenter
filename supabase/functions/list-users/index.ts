@@ -61,9 +61,9 @@ serve(async (req) => {
       .select("user_id")
       .eq("role", "admin");
 
-    const adminUserIds = new Set((adminRoles || []).map((r: any) => r.user_id));
+    const adminUserIds = new Set((adminRoles || []).map((r: { user_id: string }) => r.user_id));
 
-    const usersWithRoles = (users || []).map((u: any) => ({
+    const usersWithRoles = (users || []).map((u: { id: string; email?: string; created_at: string }) => ({
       id: u.id,
       email: u.email || "No email",
       isAdmin: adminUserIds.has(u.id),
@@ -75,7 +75,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

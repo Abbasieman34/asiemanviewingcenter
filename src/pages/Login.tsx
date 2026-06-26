@@ -33,8 +33,9 @@ const Login = () => {
       if (error) throw error;
       toast.success("Check your email for a password reset link!");
       setIsForgotPassword(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to send reset email";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -61,8 +62,9 @@ const Login = () => {
         toast.success("Welcome back!");
         navigate("/admin");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Authentication failed");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Authentication failed";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
