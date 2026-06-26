@@ -1,4 +1,4 @@
-import { Calendar, Clock } from "lucide-react";
+import DateTimeDisplay from "@/components/DateTimeDisplay";
 import type { Movie } from "@/lib/store";
 
 interface MovieCardProps {
@@ -24,16 +24,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             {movie.description}
           </p>
         )}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5 text-primary" />
-            {movie.date}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5 text-primary" />
-            {movie.time}
-          </span>
-        </div>
+        <DateTimeDisplay date={movie.date} time={movie.time} />
       </div>
     </div>
   );

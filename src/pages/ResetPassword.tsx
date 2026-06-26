@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Eye, EyeOff } from "lucide-react";
-import { Helmet } from "react-helmet-async";
-import Header from "@/components/Header";
+import { Lock } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
+import PasswordInput from "@/components/PasswordInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+const RESET_META = {
+  title: "Reset Password — Asieman Viewing Center",
+  description: "Set a new password for your Asieman Viewing Center admin account.",
+  canonicalPath: "/reset-password",
+};
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -58,16 +63,11 @@ const ResetPassword = () => {
     }
   };
 
+  const toggleVisibility = () => setShowPassword(!showPassword);
+
   if (!isRecovery) {
     return (
-      <div className="min-h-screen bg-background">
-        <Helmet>
-          <title>Reset Password — Asieman Viewing Center</title>
-          <meta name="description" content="Set a new password for your Asieman Viewing Center admin account." />
-          <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/reset-password" />
-          <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/reset-password" />
-        </Helmet>
-        <Header />
+      <PageLayout {...RESET_META}>
         <div className="flex items-center justify-center py-20 px-4">
           <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-4 text-center">
             <Lock className="h-8 w-8 text-muted-foreground mx-auto" />
@@ -77,19 +77,12 @@ const ResetPassword = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Reset Password — Asieman Viewing Center</title>
-        <meta name="description" content="Set a new password for your Asieman Viewing Center admin account." />
-        <link rel="canonical" href="https://asiemanviewingcenter.lovable.app/reset-password" />
-        <meta property="og:url" content="https://asiemanviewingcenter.lovable.app/reset-password" />
-      </Helmet>
-      <Header />
+    <PageLayout {...RESET_META}>
       <div className="flex items-center justify-center py-20 px-4">
         <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm space-y-6">
           <div className="flex items-center gap-2 justify-center text-primary">
@@ -98,37 +91,24 @@ const ResetPassword = () => {
           </div>
 
           <div className="space-y-3">
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type={showPassword ? "text" : "password"}
-                aria-label="New password"
-                placeholder="New password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type={showPassword ? "text" : "password"}
-                aria-label="Confirm new password"
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleReset()}
-                className="pl-10"
-              />
-            </div>
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              placeholder="New password"
+              ariaLabel="New password"
+              showPassword={showPassword}
+              onToggleVisibility={toggleVisibility}
+            />
+            <PasswordInput
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              placeholder="Confirm new password"
+              ariaLabel="Confirm new password"
+              showPassword={showPassword}
+              onToggleVisibility={toggleVisibility}
+              onKeyDown={(e) => e.key === "Enter" && handleReset()}
+              showToggle={false}
+            />
             <Button
               onClick={handleReset}
               disabled={loading}
@@ -145,7 +125,7 @@ const ResetPassword = () => {
           </p>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
