@@ -1,4 +1,4 @@
 project_id = "rsgxgfjnvbzjssvdpsdu"
 
 [functions.list-users]
-verify_jwt = false
+verify_jwt = true
