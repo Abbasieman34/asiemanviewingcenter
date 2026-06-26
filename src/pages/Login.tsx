@@ -33,8 +33,8 @@ const Login = () => {
       if (error) throw error;
       toast.success("Check your email for a password reset link!");
       setIsForgotPassword(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to send reset email");
     } finally {
       setLoading(false);
     }
@@ -61,8 +61,8 @@ const Login = () => {
         toast.success("Welcome back!");
         navigate("/admin");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Authentication failed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Authentication failed");
     } finally {
       setLoading(false);
     }
@@ -70,22 +70,32 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (error) {
-      toast.error("Google sign-in failed");
+    try {
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (error) {
+        toast.error(error.message || "Google sign-in failed");
+        setLoading(false);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Google sign-in failed unexpectedly");
       setLoading(false);
     }
   };
 
   const handleAppleLogin = async () => {
     setLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: window.location.origin,
-    });
-    if (error) {
-      toast.error("Apple sign-in failed");
+    try {
+      const { error } = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: window.location.origin,
+      });
+      if (error) {
+        toast.error(error.message || "Apple sign-in failed");
+        setLoading(false);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Apple sign-in failed unexpectedly");
       setLoading(false);
     }
   };

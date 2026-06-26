@@ -226,7 +226,10 @@ function MovieManager() {
   const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
-    getMovies().then(setMovies).catch(() => toast.error("Failed to load movies"));
+    getMovies().then(setMovies).catch((error) => {
+      console.error("Failed to load movies:", error);
+      toast.error("Failed to load movies");
+    });
   }, []);
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,8 +261,9 @@ function MovieManager() {
       }
       setMovies(await getMovies());
       resetForm();
-    } catch {
-      toast.error("Failed to save movie");
+    } catch (error) {
+      console.error("Failed to save movie:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save movie");
     } finally {
       setLoading(false);
     }
@@ -274,8 +278,9 @@ function MovieManager() {
       await deleteMovie(id);
       setMovies(await getMovies());
       toast.success("Movie deleted");
-    } catch {
-      toast.error("Failed to delete movie");
+    } catch (error) {
+      console.error("Failed to delete movie:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete movie");
     }
   };
 
@@ -289,8 +294,13 @@ function MovieManager() {
       toast.success(`${parsed.length} movies added!`);
       setBulkData("");
       setBulkOpen(false);
-    } catch (e) {
-      toast.error("Invalid format. Expected JSON array with fields: title, image, date, time, description (optional)");
+    } catch (error) {
+      console.error("Failed to bulk upload movies:", error);
+      toast.error(
+        error instanceof SyntaxError
+          ? "Invalid JSON format. Expected JSON array with fields: title, image, date, time, description (optional)"
+          : error instanceof Error ? error.message : "Failed to bulk upload movies"
+      );
     } finally {
       setLoading(false);
     }
@@ -395,7 +405,10 @@ function GameManager() {
   const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
-    getGames().then(setGames).catch(() => toast.error("Failed to load games"));
+    getGames().then(setGames).catch((error) => {
+      console.error("Failed to load games:", error);
+      toast.error("Failed to load games");
+    });
   }, []);
 
   const resetForm = () => {
@@ -418,8 +431,9 @@ function GameManager() {
       }
       setGames(await getGames());
       resetForm();
-    } catch {
-      toast.error("Failed to save game");
+    } catch (error) {
+      console.error("Failed to save game:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save game");
     } finally {
       setLoading(false);
     }
@@ -434,8 +448,9 @@ function GameManager() {
       await deleteGame(id);
       setGames(await getGames());
       toast.success("Game deleted");
-    } catch {
-      toast.error("Failed to delete game");
+    } catch (error) {
+      console.error("Failed to delete game:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete game");
     }
   };
 
@@ -449,8 +464,13 @@ function GameManager() {
       toast.success(`${parsed.length} games added!`);
       setBulkData("");
       setBulkOpen(false);
-    } catch (e) {
-      toast.error("Invalid format. Expected JSON array with fields: teamA, teamB, league, date, time");
+    } catch (error) {
+      console.error("Failed to bulk upload games:", error);
+      toast.error(
+        error instanceof SyntaxError
+          ? "Invalid JSON format. Expected JSON array with fields: teamA, teamB, league, date, time"
+          : error instanceof Error ? error.message : "Failed to bulk upload games"
+      );
     } finally {
       setLoading(false);
     }

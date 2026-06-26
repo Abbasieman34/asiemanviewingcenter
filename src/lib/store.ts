@@ -178,15 +178,22 @@ export async function grantAdminRole(userId: string, targetEmail: string): Promi
     .insert({ user_id: userId, role: "admin" });
   if (error) throw error;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    console.error("Failed to get current user for activity log:", userError.message);
+    return;
+  }
   if (user) {
-    await supabase.from("admin_activity_log").insert({
+    const { error: logError } = await supabase.from("admin_activity_log").insert({
       action: "grant_admin",
       target_user_id: userId,
       target_user_email: targetEmail,
       performed_by_id: user.id,
       performed_by_email: user.email || "unknown",
     });
+    if (logError) {
+      console.error("Failed to log grant_admin activity:", logError.message);
+    }
   }
 }
 
@@ -198,15 +205,22 @@ export async function revokeAdminRole(userId: string, targetEmail: string): Prom
     .eq("role", "admin");
   if (error) throw error;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    console.error("Failed to get current user for activity log:", userError.message);
+    return;
+  }
   if (user) {
-    await supabase.from("admin_activity_log").insert({
+    const { error: logError } = await supabase.from("admin_activity_log").insert({
       action: "revoke_admin",
       target_user_id: userId,
       target_user_email: targetEmail,
       performed_by_id: user.id,
       performed_by_email: user.email || "unknown",
     });
+    if (logError) {
+      console.error("Failed to log revoke_admin activity:", logError.message);
+    }
   }
 }
 

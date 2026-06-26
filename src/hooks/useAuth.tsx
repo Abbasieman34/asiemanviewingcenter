@@ -27,12 +27,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
+    if (error) {
+      console.error("Failed to check admin status:", error.message);
+      setIsAdmin(false);
+      return;
+    }
     setIsAdmin(!!data);
   };
 
@@ -58,13 +63,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await checkAdmin(session.user.id);
       }
       setLoading(false);
+    }).catch((error) => {
+      console.error("Failed to get session:", error);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Failed to sign out:", error.message);
+    }
     setUser(null);
     setSession(null);
     setIsAdmin(false);

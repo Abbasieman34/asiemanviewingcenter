@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import MovieCard from "@/components/MovieCard";
 import GameCard from "@/components/GameCard";
+import { toast } from "sonner";
 import { getMovies, getGames, type Movie, type FootballGame } from "@/lib/store";
 
 const Index = () => {
@@ -11,8 +12,14 @@ const Index = () => {
   const [games, setGames] = useState<FootballGame[]>([]);
 
   useEffect(() => {
-    getMovies().then(setMovies).catch(console.error);
-    getGames().then(setGames).catch(console.error);
+    getMovies().then(setMovies).catch((error) => {
+      console.error("Failed to load movies:", error);
+      toast.error("Failed to load movies. Please try refreshing the page.");
+    });
+    getGames().then(setGames).catch((error) => {
+      console.error("Failed to load games:", error);
+      toast.error("Failed to load games. Please try refreshing the page.");
+    });
   }, []);
 
   return (
